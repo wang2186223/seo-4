@@ -507,6 +507,9 @@ class WebsiteBuilder:
         # 保存站点地图
         tree = ET.ElementTree(urlset)
         sitemap_file = self.output_path / 'sitemap.xml'
+        
+        # 格式化XML输出
+        self._indent(urlset)
         tree.write(str(sitemap_file), encoding='utf-8', xml_declaration=True)
         print(f"生成站点地图: {sitemap_file}")
         
@@ -546,6 +549,22 @@ class WebsiteBuilder:
         
         priority_elem = ET.SubElement(url_elem, 'priority')
         priority_elem.text = priority
+    
+    def _indent(self, elem, level=0):
+        """格式化XML元素，使其具有良好的缩进"""
+        i = "\n" + level * "  "
+        if len(elem):
+            if not elem.text or not elem.text.strip():
+                elem.text = i + "  "
+            if not elem.tail or not elem.tail.strip():
+                elem.tail = i
+            for child in elem:
+                self._indent(child, level + 1)
+            if not child.tail or not child.tail.strip():
+                child.tail = i
+        else:
+            if level and (not elem.tail or not elem.tail.strip()):
+                elem.tail = i
         
     def copy_static_assets(self):
         """复制静态资源"""
